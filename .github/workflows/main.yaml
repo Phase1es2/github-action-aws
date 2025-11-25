@@ -58,3 +58,45 @@ jobs:
         tags: |
           ${{ env.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:latest
           ${{ env.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
+
+    - name: Send CI result to Lambda
+      if: always()   # ALWAYS run even if tests fail
+      run: |
+        TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+        PAYLOAD=$(jq -n \
+          --arg repo "${{ github.repository }}" \
+          --arg actor "${{ github.actor }}" \
+          --arg branch "${{ github.ref_name }}" \
+          --arg commit "${{ github.sha }}" \
+          --arg version "${{ env.VERSION }}" \
+          --arg docker_image "${{ secrets.DOCKERHUB_USERNAME }}/django-app:${{ env.VERSION }}" \
+          --arg ci_status "${{ job.status }}" \
+          --arg timestamp "$TIMESTAMP" \
+          '{
+            repository: $repo,
+            actor: $actor,
+            branch: $branch,
+            commit: $commit,
+            version: $version,
+            docker_image: $docker_image,
+            ci_status: $ci_status,
+            timestamp: $timestamp
+          }'
+        )
+
+        echo "Payload: $PAYLOAD"
+
+        aws lambda invoke \
+          --function-name git-ci-logger \
+          --invocation-type Event \
+          --payload "$PAYLOAD" \
+          response.json
