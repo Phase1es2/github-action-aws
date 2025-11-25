@@ -1,0 +1,27 @@
+*.DS_Store
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pdb
+
+# Venv
+venv/
+ENV/
+env/
+
+# Django
+*.log
+staticfiles/
+media/
+
+# Byte-compiled
+*.pyc
+
+# IDE
+.vscode/
+.idea/
+
+# Docker
+*.pid
