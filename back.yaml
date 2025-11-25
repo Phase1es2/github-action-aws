@@ -1,0 +1,52 @@
+      # -----------------------------------------------------------
+      # 10. Configure AWS Credentials
+      # -----------------------------------------------------------
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      # -----------------------------------------------------------
+      # 11. Send CI metadata to Lambda
+      # -----------------------------------------------------------
+      - name: Send CI result to Lambda
+        if: always()
+        run: |
+          sudo apt-get update && sudo apt-get install -y jq
+
+          TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+          jq -n \
+            --arg repo "${{ github.repository }}" \
+            --arg actor "${{ github.actor }}" \
+            --arg branch "${{ github.ref_name }}" \
+            --arg commit "${{ github.sha }}" \
+            --arg version "${{ env.VERSION }}" \
+            --arg docker_image "${{ secrets.DOCKERHUB_USERNAME }}/django-app:${{ env.VERSION }}" \
+            --arg ci_status "${{ job.status }}" \
+            --arg timestamp "$TIMESTAMP" \
+            '{
+              repository: $repo,
+              actor: $actor,
+              branch: $branch,
+              commit: $commit,
+              version: $version,
+              docker_image: $docker_image,
+              ci_status: $ci_status,
+              timestamp: $timestamp
+            }' > payload.json
+
+          echo "Payload JSON:"
+          cat payload.json
+
+          aws lambda invoke \
+            --function-name git-ci-logger \
+            --invocation-type Event \
+            --cli-binary-format raw-in-base64-out \
+            --payload file://payload.json \
+            response.json
+
+          echo "Lambda response:"
+          cat response.json
