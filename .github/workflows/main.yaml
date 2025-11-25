@@ -68,11 +68,13 @@ jobs:
         aws-region: ${{ secrets.AWS_REGION }}
 
     - name: Send CI result to Lambda
-      if: always()   # ALWAYS run even if tests fail
+      if: always()
       run: |
+        sudo apt-get update && sudo apt-get install -y jq
+
         TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
-        PAYLOAD=$(jq -n \
+        jq -n \
           --arg repo "${{ github.repository }}" \
           --arg actor "${{ github.actor }}" \
           --arg branch "${{ github.ref_name }}" \
@@ -90,13 +92,16 @@ jobs:
             docker_image: $docker_image,
             ci_status: $ci_status,
             timestamp: $timestamp
-          }'
-        )
+          }' > payload.json
 
-        echo "Payload: $PAYLOAD"
+        echo "Payload JSON:"
+        cat payload.json
 
         aws lambda invoke \
           --function-name git-ci-logger \
           --invocation-type Event \
-          --payload "$PAYLOAD" \
+          --payload file://payload.json \
           response.json
+
+        echo "Lambda response:"
+        cat response.json
