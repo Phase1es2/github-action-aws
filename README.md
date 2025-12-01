@@ -14,7 +14,7 @@ flowchart TD
     B -->|kubectl| C[EKS Cluster]
     C --> D[Deployments / Services / Pods]
 
-    subgraph Lambda Layer (bin/)
+    subgraph LAYER[Lambda Layer (bin/)]
         E[kubectl]
         F[aws-iam-authenticator]
         G[aws]
@@ -119,13 +119,13 @@ print(boto3.client("sts").get_caller_identity())
 Example output:
 
 ```
-arn:aws:sts::062825750454:assumed-role/nlp-for-devops-eks-prod-role-xpvy3jj9/nlp-for-devops-eks-prod
+arn:aws:sts::xxxxx:assumed-role/nlp-for-devops-eks-prod-role-xxxx/nlp-for-devops-eks-prod
 ```
 
 So your role is:
 
 ```
-arn:aws:iam::062825750454:role/nlp-for-devops-eks-prod-role-xpvy3jj9
+arn:aws:iam::xxxxxxxxx:role/nlp-for-devops-eks-prod-role-xxxxxx
 ```
 
 Add to EKS:
@@ -137,7 +137,7 @@ kubectl edit configmap aws-auth -n kube-system
 Insert:
 
 ```yaml
-- rolearn: arn:aws:iam::062825750454:role/nlp-for-devops-eks-prod-role-xpvy3jj9
+- rolearn: arn:aws:iam::xxxxxxxxx:role/nlp-for-devops-eks-prod-role-xxxxxxxx
   username: lambda
   groups:
     - system:masters
