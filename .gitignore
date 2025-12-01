@@ -25,3 +25,6 @@ media/
 
 # Docker
 *.pid
+
+*.zip
+bin
