@@ -14,7 +14,7 @@ flowchart TD
     B -->|kubectl| C[EKS Cluster]
     C --> D[Deployments / Services / Pods]
 
-    subgraph LAYER[Lambda Layer (bin/)]
+    subgraph LAYER["Lambda Layer (bin/)"]
         E[kubectl]
         F[aws-iam-authenticator]
         G[aws]
