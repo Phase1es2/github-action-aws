@@ -49,17 +49,17 @@ YAML_DIR="./yaml"
 echo "Deploying Production resources into namespace: ${NAMESPACE_PROD}"
 kubectl apply -f "${YAML_DIR}/deployment-prod.yaml"
 kubectl apply -f "${YAML_DIR}/service-prod.yaml"
-echo "✅ Production Deployment and Service complete."
+echo "Production Deployment and Service complete."
 
 # 3.2. Deploy QA Resources
 echo "Deploying QA resources into namespace: ${NAMESPACE_QA}"
 kubectl apply -f "${YAML_DIR}/deployment-qa.yaml"
 kubectl apply -f "${YAML_DIR}/service-qa.yaml"
-echo "✅ QA Deployment and Service complete."
+echo "QA Deployment and Service complete."
 
 echo "---"
 
-echo "🎉 All tasks complete!"
+echo "All tasks complete!"
 echo "You can now view your cluster nodes and namespaces using the following commands:"
 echo "kubectl get nodes"
 echo "kubectl get ns"
