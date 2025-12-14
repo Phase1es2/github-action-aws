@@ -1,17 +1,17 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: django-app
+  name: django-app-prod
   namespace: prod
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: django-app
+      app: django-app-prod
   template:
     metadata:
       labels:
-        app: django-app
+        app: django-app-prod
     spec:
       containers:
         - name: django-app
